@@ -36,6 +36,17 @@ def load_restaurants_stream(spark: SparkSession) -> DataFrame:
                  .withColumn('feedback', F.lit(None).cast(StringType()))
            )
 
+def get_output_df(spark: SparkSession, restaurants_df: DataFrame) -> DataFrame:
+    subscribers_restaurants_df = (spark.read.format("jdbc")
+                                       .options(**config.pg_settings["src"]).load())
+
+    return (restaurants_df.join(subscribers_restaurants_df, "restaurant_id", how="inner")
+                          .select("restaurant_id", "adv_campaign_id", "adv_campaign_content",
+                                  "adv_campaign_owner", "adv_campaign_owner_contact",
+                                  "adv_campaign_datetime_start", "adv_campaign_datetime_end",
+                                  "datetime_created", "client_id", "trigger_datetime_created", "feedback")
+           )
+
 def save_data(df, epoch_id) -> None:
     df.persist()
 
@@ -49,17 +60,6 @@ def save_data(df, epoch_id) -> None:
     )
 
     df.unpersist()
-
-def get_output_df(spark: SparkSession, restaurants_df: DataFrame) -> DataFrame:
-    subscribers_restaurants_df = (spark.read.format("jdbc")
-                                       .options(**config.pg_settings["src"]).load())
-
-    return (restaurants_df.join(subscribers_restaurants_df, "restaurant_id", how="inner")
-                          .select("restaurant_id", "adv_campaign_id", "adv_campaign_content",
-                                  "adv_campaign_owner", "adv_campaign_owner_contact",
-                                  "adv_campaign_datetime_start", "adv_campaign_datetime_end",
-                                  "datetime_created", "client_id", "trigger_datetime_created", "feedback")
-           )
 
 
 def main():
