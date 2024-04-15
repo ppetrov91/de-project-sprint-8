@@ -16,7 +16,7 @@ pg_settings = {
         "password": "jovyan",
         "url": "jdbc:postgresql://localhost:5432/de",
         "driver": "org.postgresql.Driver",
-        "dbtable": "public.create_subscribers_feedback"
+        "dbtable": "public.subscribers_feedback"
     }
 }
 
